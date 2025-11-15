@@ -1,15 +1,18 @@
 ---
-title: "Homework 5: Version Control, Containerization, and HPC"
+title: 'Homework 5: Version Control, Containerization, and HPC'
 author: "STOR 674"
-date: "Due: 11/21/2025"
-output: 
+date: 'Due: 11/21/2025'
+output:
+  pdf_document:
+    toc: true
+    latex_engine: xelatex
   html_document:
     toc: true
     toc_float: true
     theme: united
     highlight: tango
-editor_options: 
-  markdown: 
+editor_options:
+  markdown:
     wrap: 72
 ---
 
