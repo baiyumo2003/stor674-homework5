@@ -177,7 +177,6 @@ cd stor674-homework5
 git add compute_bench.py Homework5.Rmd
 git commit -m "Initial commit with homework files"
 git push origin main
-
 ```
 
 **c)** (2 points) Create a new branch called `docker-build` where you
@@ -274,7 +273,6 @@ RUN pip install torch torchvision
 # Run the script by default
 CMD ["python", "compute_bench.py"]
 
-
 ```
 
 **Grading Criteria:** - Appropriate Linux base image selection (2
@@ -292,7 +290,6 @@ Include the full command and explain each part.
 # Your command here
 docker build -t myimage .
 docker run --rm myimage
-
 ```
 
 **Explanation:**
@@ -330,7 +327,6 @@ tensor([-0.1326, -1.5500,  1.1859,  1.5597,  0.7008, -0.4011, -1.1648,  0.1153,
         -0.3273, -0.3363])
 
 Saved data to mydata.pt
-
 ```
 
 **c)** (3 points) Were there any issues you encountered during the build
@@ -362,7 +358,6 @@ Dockerfile with a descriptive commit message. What commands did you use?
 
 git add Dockerfile
 git commit -m "Add Dockerfile for computing benchmark container"
-
 ```
 
 **b)** (4 points) Switch to the `main` branch and merge the
@@ -373,7 +368,6 @@ merge message or output.
 
 ``` bash
 # Commands to switch branch and merge
-
 
 
 ```
@@ -488,7 +482,6 @@ Docker image from Docker Hub. What command did you use?
 module load apptainer
 apptainer pull stor674.sif docker://bryce314/stor674:latest
 
-
 ```
 
 **b)** (3 points) What is the name of the Apptainer image file (.sif)
@@ -564,7 +557,6 @@ apptainer exec --nv stor674.sif \
 echo "Job completed at: $(date)"
 
 
-
 ```
 
 **Grading Criteria:** - Appropriate Slurm directives (#SBATCH) (4
@@ -635,7 +627,6 @@ Job completed at: Fri Nov 14 10:43:54 PM EST 2025
 
 
 
-
 ```
 
 **GitHub Verification:** ✓ Pushed `run_compute_bench.sh` to repository
@@ -644,7 +635,7 @@ Job completed at: Fri Nov 14 10:43:54 PM EST 2025
 Slurm queue or completed job information using `squeue` or `sacct`. Also
 show that your job successfully utilized a GPU (if you requested one).
 
-![](images/clipboard-4061035267.png)
+![](images/clipboard-3217076835.png)
 
 ------------------------------------------------------------------------
 
