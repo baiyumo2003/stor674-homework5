@@ -12,3 +12,9 @@ RUN pip install torch torchvision
 
 # Run the script by default
 CMD ["python", "compute_bench.py"]
+
+
+
+
+
+
