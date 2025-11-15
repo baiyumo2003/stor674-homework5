@@ -172,7 +172,11 @@ initial commit. What commands did you use?
 # Commands you used
 
 
-
+git clone https://github.com/your-username/stor674-homework5
+cd stor674-homework5
+git add compute_bench.py Homework5.Rmd
+git commit -m "Initial commit with homework files"
+git push origin main
 
 ```
 
@@ -186,11 +190,16 @@ directly on `main`?
 ``` bash
 # Command to create and switch to branch
 
+git checkout -b docker-build
 ```
 
 **Explanation:**
 
-<!-- Why use a separate branch? -->
+It is good practice to use a separate branch for development because it
+allows you to work on new features or changes without affecting the
+stable `main` branch. This prevents unfinished or broken code from being
+added to the main codebase, makes collaboration easier, and allows you
+to test and review changes before merging them back into `main`.
 
 ## Question 2.1: Understanding compute_bench.py (5 points)
 
@@ -199,13 +208,18 @@ script do? What is its main purpose?
 
 **Answer:**
 
-<!-- Write your answer here -->
+The `compute_bench.py` script benchmarks computation speed using PyTorch
+on both the CPU and GPU. Its main purpose is to generate large random
+tensors, perform a simple computation (`x = torch.randn(n) ** 4`), and
+measure how long the operation takes on each device. It prints timing
+results for different input sizes, generates a small sample of random
+numbers, and saves the sample to a file called `mydata.pt`.
 
 **b)** (2 points) What Python packages does `compute_bench.py` require?
 
 **Answer:**
 
-<!-- Write your answer here -->
+torch and time. However time is built in so only need to install torch
 
 ## Question 2.2: Create a Dockerfile (10 points)
 
@@ -245,7 +259,20 @@ the script
 ``` dockerfile
 # Paste your Dockerfile content here
 
+# Start from a Python base image
+FROM python:3.9-slim
 
+# Set the working directory
+WORKDIR /app
+
+# Copy your script into the container
+COPY compute_bench.py .
+
+# Install required packages
+RUN pip install torch torchvision
+
+# Run the script by default
+CMD ["python", "compute_bench.py"]
 
 
 ```
@@ -263,11 +290,20 @@ Include the full command and explain each part.
 
 ``` bash
 # Your command here
+docker build -t myimage .
+docker run --rm myimage
+
 ```
 
 **Explanation:**
 
-<!-- Explain each part of your command -->
+`docker build` — tells Docker to build an image.
+
+`-t myimage` — assigns the name (tag) **myimage** to the image so it can
+be run later.
+
+`.` — tells Docker to use the current directory as the build context
+(this directory must contain your Dockerfile).
 
 **b)** (4 points) What command did you use to run your Docker image
 locally to test it? Include the output you received.
@@ -276,12 +312,24 @@ locally to test it? Include the output you received.
 
 ``` bash
 # Your command here
+docker run --rm myimage
 ```
 
 **Output:**
 
 ```         
 # Paste the output here
+No GPU available, running on CPU only
+
+CPU Computations:
+Time for 10,000,000 elements: 0.1147 seconds
+Time for 100,000,000 elements: 1.2490 seconds
+
+Small sample of 10 random numbers:
+tensor([-0.1326, -1.5500,  1.1859,  1.5597,  0.7008, -0.4011, -1.1648,  0.1153,
+        -0.3273, -0.3363])
+
+Saved data to mydata.pt
 
 ```
 
@@ -290,7 +338,14 @@ or test? How did you resolve them?
 
 **Answer:**
 
-<!-- Write your answer here -->
+During the build and test process, I encountered an issue where the
+script saved the output file (`mydata.pt`) inside the Docker container
+instead of on my local machine. This made it seem like the file
+“disappeared” after the container finished running. I resolved this by
+running the container with a mounted volume (`-v $(pwd):/app`), which
+allowed the file created inside the container to be written directly to
+my local directory. After mounting the volume, the script ran correctly
+and the output file appeared on my machine.
 
 ## Question 2.4: Version Control Your Docker Build (10 points)
 
@@ -305,6 +360,8 @@ Dockerfile with a descriptive commit message. What commands did you use?
 ``` bash
 # Commands to add and commit Dockerfile
 
+git add Dockerfile
+git commit -m "Add Dockerfile for computing benchmark container"
 
 ```
 
@@ -325,7 +382,12 @@ merge message or output.
 
 ```         
 # Paste merge output here
-
+git merge docker-build
+Updating 9d09bb8..9eb671c
+Fast-forward
+ dockerfile | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+ create mode 100644 dockerfile
 ```
 
 **c)** (3 points) Push your changes to GitHub. Verify that your
@@ -337,6 +399,7 @@ did you use to push?
 ``` bash
 # Command to push to GitHub
 
+git push origin main
 ```
 
 **Verification:** Visit your GitHub repository in a web browser and
@@ -349,7 +412,7 @@ and provide your Docker Hub username.
 
 **Docker Hub Username:**
 
-<!-- Your username here -->
+bryce314
 
 **b)** (4 points) Tag your image appropriately and push it to Docker
 Hub. What commands did you use?
@@ -358,9 +421,10 @@ Hub. What commands did you use?
 
 ``` bash
 # Commands you used
+docker tag myimage bryce314/myimage:latest
+docker push bryce314/myimage:latest
 
-
-
+To mitigate the problem about arm abd amd I used the ACtion on github to get the docker imgae for the longleaf system.
 ```
 
 **c)** (3 points) Provide the full Docker Hub image URL/name that others
@@ -370,6 +434,9 @@ can use to pull your image.
 
 ```         
 # Format: username/imagename:tag
+https://hub.docker.com/r/bryce314/myimage
+
+docker://bryce314/stor674:latest
 ```
 
 ------------------------------------------------------------------------
@@ -388,14 +455,26 @@ used on HPC systems instead of Docker?
 
 **Answer:**
 
-<!-- Write your answer here -->
+Apptainer (formerly called Singularity) is a container system designed
+specifically for high-performance computing (HPC) environments. It is
+used instead of Docker on HPC systems because it is more secure: it does
+not require root privileges to run containers, and it prevents users
+from gaining elevated permissions on shared systems. HPC clusters use
+Apptainer because it is safer for multi-user environments, integrates
+well with job schedulers, and supports running containers without
+allowing users to modify the host system.
 
 **b)** (2 points) What does "Bring Your Own Environment" (BYOE) mean in
 the context of HPC and containers?
 
 **Answer:**
 
-<!-- Write your answer here -->
+“Bring Your Own Environment” (BYOE) means that users can package their
+entire software environment—including libraries, dependencies, and
+executables—inside a container and run it on an HPC system exactly the
+same way they run it locally. This ensures reproducibility and removes
+dependency conflicts because each user’s environment is isolated inside
+their own container.
 
 ## Question 3.2: Convert Docker Image to Apptainer (10 points)
 
@@ -406,6 +485,9 @@ Docker image from Docker Hub. What command did you use?
 
 ``` bash
 # Command to pull/convert Docker image to Apptainer
+module load apptainer
+apptainer pull stor674.sif docker://bryce314/stor674:latest
+
 
 ```
 
@@ -416,6 +498,8 @@ that was created?
 
 ```         
 # Filename here
+
+stor674.sif
 ```
 
 **c)** (2 points) Test your Apptainer image interactively. What command
@@ -425,7 +509,7 @@ did you use to run it?
 
 ``` bash
 # Command to run Apptainer image
-
+apptainer shell stor674.sif
 ```
 
 ## Question 3.3: Create Slurm Job Script (12 points)
@@ -449,13 +533,35 @@ the container will automatically use the GPU!
 
 ``` bash
 #!/bin/bash
+#SBATCH -n 1                         # number of tasks
+#SBATCH -c 1                        # number of CPU cores
+#SBATCH -t 1:00:00                   # walltime (1 hour)
+#SBATCH --mem=10G                    # total memory
+#SBATCH -p l40-gpu             # GPU partition
+#SBATCH --qos=gpu_access             # QoS for GPU use
+#SBATCH --gres=gpu:1    # request one GPU
+#SBATCH -J compute_bench_job         # job name
+#SBATCH -o compute_bench_%j.out      # standard output file
+#SBATCH -e compute_bench_%j.err      # standard error file
 
-# Paste your Slurm script here
+# --- Environment setup ---
+module purge
+module load apptainer                
+module load cuda/12.6                # load CUDA if needed for GPU
 
+# --- Diagnostics ---
+echo "Running on host: $(hostname)"
+echo "CUDA devices available:"
+nvidia-smi
+echo "----------------------------------"
 
+# --- Run your containerized script ---
+# Example: assuming your image is compute_bench.sif
+apptainer exec --nv stor674.sif \
+    python /app/compute_bench.py
 
-
-
+# --- Done ---
+echo "Job completed at: $(date)"
 
 
 
@@ -473,6 +579,7 @@ and job organization (2 points)
 
 ``` bash
 # Command here
+sbatch run_compute_bench.sh
 ```
 
 **b)** (2 points) Provide the output of your job. Paste the contents of
@@ -485,6 +592,45 @@ script (`run_compute_bench.sh`) to your GitHub repository and push it.
 # Paste your job output here
 
 
+Running on host: g181004.ll.unc.edu
+CUDA devices available:
+Fri Nov 14 22:43:46 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 575.57.08              Driver Version: 575.57.08      CUDA Version: 12.9     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA L40S                    On  |   00000000:1A:00.0 Off |                    0 |
+| N/A   31C    P8             61W /  350W |       0MiB /  46068MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+----------------------------------
+GPU available: NVIDIA L40S
+
+CPU Computations:
+Time for 10,000,000 elements: 0.1134 seconds
+Time for 100,000,000 elements: 0.8066 seconds
+
+GPU Computations:
+Time for 10,000,000 elements: 0.1859 seconds
+Time for 100,000,000 elements: 0.0026 seconds
+
+Small sample of 10 random numbers:
+tensor([ 0.3367,  0.1288,  0.2345,  0.2303, -1.1229, -0.1863,  2.2082, -0.6380,
+         0.4617,  0.2674])
+
+Saved data to mydata.pt
+Job completed at: Fri Nov 14 10:43:54 PM EST 2025
 
 
 
@@ -498,6 +644,8 @@ script (`run_compute_bench.sh`) to your GitHub repository and push it.
 Slurm queue or completed job information using `squeue` or `sacct`. Also
 show that your job successfully utilized a GPU (if you requested one).
 
+![](images/clipboard-4061035267.png)
+
 ------------------------------------------------------------------------
 
 # Part 4: Reflection and Best Practices (Optional - Extra Credit: 5 points)
@@ -509,7 +657,19 @@ challenges?
 
 **Answer:**
 
-<!-- Write your answer here -->
+The Git → Docker → HPC workflow improves reproducibility by keeping
+code, environment, and data consistent across systems. Using Git tracks
+all code changes and versions. Docker (or Apptainer) packages the entire
+software environment, including dependencies, so that the same container
+can be run anywhere without setup differences. Running it on an HPC
+ensures scalable and reliable computation on powerful hardware.
+
+Advantages include consistent results, easier collaboration, and
+simplified sharing and verification of experiments. Potential challenges
+include the learning curve of container tools, managing large images,
+and handling differences between Docker and Apptainer. Overall, this
+workflow ensures transparency, repeatability, and reliability in
+computational research.
 
 ------------------------------------------------------------------------
 
@@ -517,20 +677,20 @@ challenges?
 
 Before submitting, make sure you have:
 
--   [ ] Completed all questions in Part 1 (Git/GitHub concepts)
--   [ ] **Created a GitHub repository with all your project files**
--   [ ] **Practiced branching and merging in your Git workflow**
--   [ ] Created a Dockerfile with CUDA support for GPU computing
--   [ ] Built and tested your Docker image locally (Linux container on
+-   [x] Completed all questions in Part 1 (Git/GitHub concepts)
+-   [x] **Created a GitHub repository with all your project files**
+-   [x] **Practiced branching and merging in your Git workflow**
+-   [x] Created a Dockerfile with CUDA support for GPU computing
+-   [x] Built and tested your Docker image locally (Linux container on
     macOS/Windows)
--   [ ] Pushed your image to Docker Hub
--   [ ] Provided your Docker Hub image URL
--   [ ] Created a Slurm job script
--   [ ] Successfully ran your job on Longleaf
--   [ ] **Pushed all files (Dockerfile, Slurm script, completed Rmd) to
+-   [x] Pushed your image to Docker Hub
+-   [x] Provided your Docker Hub image URL
+-   [x] Created a Slurm job script
+-   [x] Successfully ran your job on Longleaf
+-   [x] **Pushed all files (Dockerfile, Slurm script, completed Rmd) to
     GitHub**
--   [ ] Included all output and screenshots
--   [ ] Compiled this Rmd file to HTML or PDF
+-   [x] Included all output and screenshots
+-   [x] Compiled this Rmd file to HTML or PDF
 
 **Submission Instructions:**
 
